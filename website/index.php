@@ -15,7 +15,8 @@ if (isset($_SESSION['steamid'])) {
 	$skins = UtilsClass::skinsFromJson();
 	$querySelected = $query3 = $db->select("SELECT `weapon_defindex`, `weapon_paint_id` FROM `wp_player_skins` WHERE `wp_player_skins`.`steamid` = :steamid", ["steamid" => $steamid]);
 	$selectedSkins = UtilsClass::getSelectedSkins($querySelected);
-	$selectedKnife = $db->select("SELECT * FROM `wp_player_knife` WHERE `wp_player_knife`.`steamid` = :steamid", ["steamid" => $steamid])[0];
+	$queryResult = $db->select("SELECT * FROM `wp_player_knife` WHERE `wp_player_knife`.`steamid` = :steamid", ["steamid" => $steamid]);
+    $selectedKnife = !empty($queryResult) ? $queryResult[0] : null;
 	$knifes = UtilsClass::getKnifeTypes();
 
 	if (isset($_POST['forma'])) {
@@ -42,11 +43,8 @@ if (isset($_SESSION['steamid'])) {
 
 <head>
 	<meta charset="utf-8">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-		integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-		integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-		crossorigin="anonymous"></script>
+	<link rel="=stylesheet" href="bootstrap.min.css">
+	<script src="bootstrap.bundle.min.js"></script>
 	<link rel="stylesheet" href="style.css">
 	<title>CS2 Simple Weapon Paints</title>
 </head>
@@ -68,13 +66,14 @@ if (isset($_SESSION['steamid'])) {
 				<div class="card-body">
 					<?php
 					$actualKnife = $knifes[0];
-					foreach ($knifes as $knife) {
-						if ($selectedKnife['knife'] == $knife['weapon_name']) {
-							$actualKnife = $knife;
-							break;
+					if ($selectedKnife !== null) {
+						foreach ($knifes as $knife) {
+							if ($selectedKnife['knife'] == $knife['weapon_name']) {
+								$actualKnife = $knife;
+								break;
+							}
 						}
 					}
-
 					echo "<div class='card-header'>";
 					echo "<h6 class='card-title item-name'>Knife type</h6>";
 					echo "<h5 class='card-title item-name'>{$actualKnife["paint_name"]}</h5>";
